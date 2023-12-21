@@ -37,32 +37,47 @@ st.divider()
 
 #------------------------------------------------------------
 #FUNCTIONS
-def extract_graphviz_info(text):
+def extract_graphviz_info(text: str) -> list[str]:
   """
-  Extracts information about the graphviz graph from a text.
+  The function `extract_graphviz_info` takes in a text and returns a list of graphviz code blocks found in the text.
 
-  Args:
-    text: The text to extract the graphviz graph information from.
-
-  Returns:
-    A single string containing all the extracted information, or None if the text does not contain any graphviz graph information.
+  :param text: The `text` parameter is a string that contains the text from which you want to extract Graphviz information
+  :return: a list of strings that contain either the word "graph" or "digraph". These strings are extracted from the input
+  text.
   """
 
   graphviz_info  = text.split('```')
 
   return [graph for graph in graphviz_info if 'graph' in graph or 'digraph' in graph]
 
-def append_message(message):
+def append_message(message: dict) -> None:
+    """
+    The function appends a message to a chat session.
+
+    :param message: The `message` parameter is a dictionary that represents a chat message. It typically contains
+    information such as the user who sent the message and the content of the message
+    :type message: dict
+    :return: The function is not returning anything.
+    """
     st.session_state.chat_session.append({'user': message})
     return
 
 @st.cache_resource
-def load_model():
+def load_model() -> genai.GenerativeModel:
+    """
+    The function `load_model()` returns an instance of the `genai.GenerativeModel` class initialized with the model name
+    'gemini-pro'.
+    :return: an instance of the `genai.GenerativeModel` class.
+    """
     model = genai.GenerativeModel('gemini-pro')
     return model
 
 @st.cache_resource
-def load_modelvision():
+def load_modelvision() -> genai.GenerativeModel:
+    """
+    The function `load_modelvision` loads a generative model for vision tasks using the `gemini-pro-vision` model.
+    :return: an instance of the `genai.GenerativeModel` class.
+    """
     model = genai.GenerativeModel('gemini-pro-vision')
     return model
 
@@ -199,9 +214,9 @@ if prompt:
 
     if graphviz_mode:
         if lang == 'Español':
-          txt += '   Genera un grafo con graphviz en .dot: \n'
+          txt += '   Genera un grafo con graphviz en .dot \n'
         else:
-          txt += '   Generate a graph with graphviz in .dot: \n'
+          txt += '   Generate a graph with graphviz in .dot \n'
 
     if len(txt) > 5000:
         txt = txt[:5000] + '...'
@@ -237,7 +252,12 @@ if prompt:
         else:
             response = st.session_state.chat.send_message(prmt['parts'][0])
 
-        append_message({'role': 'model', 'parts':response.text})
+        try:
+          append_message({'role': 'model', 'parts':response.text})
+        except Exception as e:
+          append_message({'role': 'model', 'parts':f'{type(e).__name__}: {e}'})
+
+
         st.rerun()
 
 
