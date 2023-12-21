@@ -63,7 +63,7 @@ if 'chat' not in st.session_state:
 if 'chat_session' not in st.session_state:
     st.session_state.chat_session = []
 
-st.session_state.chat_session
+#st.session_state.chat_session
 
 #------------------------------------------------------------
 #CHAT
@@ -92,7 +92,7 @@ if len(st.session_state.chat_session) > 0:
                 graphs = extract_graphviz_info(message['user']['parts'])
                 if len(graphs) > 0:
                     for graph in graphs:
-                        st.graphviz_chart(graph)
+                        st.graphviz_chart(graph,use_container_width=True)
                         with st.expander("Ver texto"):
                           st.write(graph)
         else:
