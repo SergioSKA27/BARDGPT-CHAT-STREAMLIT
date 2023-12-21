@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 import google.generativeai as genai
-
-
+import re
 from PIL import Image
+
 #Je t'aime plus que les mots,
 #Plus que les sentiments,
 #Plus que la vie elle-même
@@ -21,6 +21,21 @@ Powered by Google AI <img src="https://seeklogo.com/images/G/google-ai-logo-996E
 st.caption("By Sergio Demis Lopez Martinez")
 st.divider()
 
+
+def extract_graphviz_info(text):
+  """
+  Extracts information about the graphviz graph from a text.
+
+  Args:
+    text: The text to extract the graphviz graph information from.
+
+  Returns:
+    A single string containing all the extracted information, or None if the text does not contain any graphviz graph information.
+  """
+
+  graphviz_info  = text.split('```')
+
+  return [graph for graph in graphviz_info if 'graph' in graph or 'digraph' in graph]
 
 def append_message(message):
     st.session_state.chat_session.append({'user': message})
@@ -48,7 +63,7 @@ if 'chat' not in st.session_state:
 if 'chat_session' not in st.session_state:
     st.session_state.chat_session = []
 
-#st.session_state.chat_session
+st.session_state.chat_session
 
 #------------------------------------------------------------
 #CHAT
@@ -74,6 +89,12 @@ if len(st.session_state.chat_session) > 0:
         if message['user']['role'] == 'model':
             with st.chat_message('ai'):
                 st.write(message['user']['parts'])
+                graphs = extract_graphviz_info(message['user']['parts'])
+                if len(graphs) > 0:
+                    for graph in graphs:
+                        st.graphviz_chart(graph)
+                        with st.expander("Ver texto"):
+                          st.write(graph)
         else:
             with st.chat_message('user'):
                 st.write(message['user']['parts'][0])
