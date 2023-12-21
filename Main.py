@@ -57,7 +57,7 @@ if 'messages' not in st.session_state:
     st.session_state.messages = []
 
 if 'welcome' not in st.session_state:
-    welcome  = model.generate_content('Da un saludo de bienvenida al usuario y sugiere que puede hacer(Puedes describir imágenes, responder preguntas, leer texto, leer tablas, etc.) eres un chatbot en una aplicación de chat creada por sergio demis lopez martinez en streamlit y python')
+    welcome  = model.generate_content('Da un saludo de bienvenida al usuario y sugiere que puede hacer(Puedes describir imágenes, responder preguntas, leer archivos texto, leer tablas, etc.) eres un chatbot en una aplicación de chat creada por sergio demis lopez martinez en streamlit y python')
     welcome.resolve()
     st.session_state.welcome = welcome
 
