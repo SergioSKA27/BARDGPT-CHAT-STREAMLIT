@@ -92,7 +92,7 @@ if len(st.session_state.chat_session) > 0:
                 graphs = extract_graphviz_info(message['user']['parts'])
                 if len(graphs) > 0:
                     for graph in graphs:
-                        st.graphviz_chart(graph,use_container_width=True)
+                        st.graphviz_chart(graph,use_container_width=False)
                         with st.expander("Ver texto"):
                           st.write(graph)
         else:
@@ -114,7 +114,8 @@ with cols[1]:
     txt_atachment = st.checkbox("Adjuntar texto")
 with cols[2]:
     csv_excel_atachment = st.checkbox("Adjuntar CSV o Excel")
-
+with cols[3]:
+    graphviz_mode = st.checkbox("Modo Graphviz")
 
 if image_atachment:
     image = st.file_uploader("Sube tu imagen", type=['png', 'jpg', 'jpeg'])
@@ -145,7 +146,10 @@ if prompt:
             df = pd.read_csv(csvexcelattachment)
         except:
             df = pd.read_excel(csvexcelattachment)
-        txt = '   Dataframe: \n' + str(df)
+        txt += '   Dataframe: \n' + str(df)
+
+    if graphviz_mode:
+        txt += '   Genera un grafo con graphviz en .dot: \n'
 
     if len(txt) > 5000:
         txt = txt[:5000] + '...'
