@@ -20,9 +20,23 @@ st.markdown('''
 Powered by Google AI <img src="https://seeklogo.com/images/G/google-ai-logo-996E85F6FD-seeklogo.com.png" width="20" height="20">
 , Streamlit and Python''', unsafe_allow_html=True)
 st.caption("By Sergio Demis Lopez Martinez")
+
+langcols = st.columns([0.2,0.8])
+with langcols[0]:
+  lang = st.selectbox('Select your language',
+  ('English', 'Español', 'Français', 'Deutsch',
+  'Italiano', 'Português', 'Polski', 'Nederlands',
+  'Русский', '日本語', '한국어', '中文', 'العربية',
+  'हिन्दी', 'Türkçe', 'Tiếng Việt', 'Bahasa Indonesia',
+  'ภาษาไทย', 'Română', 'Ελληνικά', 'Magyar', 'Čeština',
+  'Svenska', 'Norsk', 'Suomi', 'Dansk', 'हिन्दी', 'हिन्�'),index=1)
+
+if 'lang' not in st.session_state:
+    st.session_state.lang = lang
 st.divider()
 
-
+#------------------------------------------------------------
+#FUNCTIONS
 def extract_graphviz_info(text):
   """
   Extracts information about the graphviz graph from a text.
@@ -72,8 +86,12 @@ if 'chat_session' not in st.session_state:
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 
-if 'welcome' not in st.session_state:
-    welcome  = model.generate_content('Da un saludo de bienvenida al usuario y sugiere que puede hacer(Puedes describir imágenes, responder preguntas, leer archivos texto, leer tablas, etc.) eres un chatbot en una aplicación de chat creada por sergio demis lopez martinez en streamlit y python')
+if 'welcome' not in st.session_state or lang != st.session_state.lang:
+    st.session_state.lang = lang
+    welcome  = model.generate_content(f'''
+    Da un saludo de bienvenida al usuario y sugiere que puede hacer
+    (Puedes describir imágenes, responder preguntas, leer archivos texto, leer tablas,generar gráficos con graphviz, etc)
+    eres un chatbot en una aplicación de chat creada en streamlit y python. generate the answer in {lang}''')
     welcome.resolve()
     st.session_state.welcome = welcome
 
@@ -110,17 +128,33 @@ if len(st.session_state.chat_session) > 0:
 cols=st.columns(4)
 
 with cols[0]:
-    image_atachment = st.toggle("Adjuntar imagen", value=False, help="Activa este modo para adjuntar una imagen y que el chatbot pueda leerla")
-with cols[1]:
-    txt_atachment = st.toggle("Adjuntar archivo de texto", value=False, help="Activa este modo para adjuntar un archivo de texto y que el chatbot pueda leerlo")
-with cols[2]:
-    csv_excel_atachment = st.toggle("Adjuntar CSV o Excel", value=False, help="Activa este modo para adjuntar un archivo CSV o Excel y que el chatbot pueda leerlo")
-with cols[3]:
-    graphviz_mode = st.toggle("Modo graphviz", value=False, help="Activa este modo para generar un grafo con graphviz en .dot a partir de tu mensaje")
+    if lang == 'Español':
+      image_atachment = st.toggle("Adjuntar imagen", value=False, help="Activa este modo para adjuntar una imagen y que el chatbot pueda leerla")
+    else:
+      image_atachment = st.toggle("Attach image", value=False, help="Activate this mode to attach an image and let the chatbot read it")
 
+with cols[1]:
+    if lang == 'Español':
+      txt_atachment = st.toggle("Adjuntar archivo de texto", value=False, help="Activa este modo para adjuntar un archivo de texto y que el chatbot pueda leerlo")
+    else:
+      txt_atachment = st.toggle("Attach text file", value=False, help="Activate this mode to attach a text file and let the chatbot read it")
+with cols[2]:
+    if lang == 'Español':
+      csv_excel_atachment = st.toggle("Adjuntar CSV o Excel", value=False, help="Activa este modo para adjuntar un archivo CSV o Excel y que el chatbot pueda leerlo")
+    else:
+      csv_excel_atachment = st.toggle("Attach CSV or Excel", value=False, help="Activate this mode to attach a CSV or Excel file and let the chatbot read it")
+with cols[3]:
+    if lang == 'Español':
+      graphviz_mode = st.toggle("Modo graphviz", value=False, help="Activa este modo para generar un grafo con graphviz en .dot a partir de tu mensaje")
+    else:
+      graphviz_mode = st.toggle("Graphviz mode", value=False, help="Activate this mode to generate a graph with graphviz in .dot from your message")
 if image_atachment:
-    image = st.file_uploader("Sube tu imagen", type=['png', 'jpg', 'jpeg'])
-    url = st.text_input("O pega la url de tu imagen")
+    if lang == 'Español':
+      image = st.file_uploader("Sube tu imagen", type=['png', 'jpg', 'jpeg'])
+      url = st.text_input("O pega la url de tu imagen")
+    else:
+      image = st.file_uploader("Upload your image", type=['png', 'jpg', 'jpeg'])
+      url = st.text_input("Or paste your image url")
 else:
     image = None
     url = ''
@@ -128,21 +162,33 @@ else:
 
 
 if txt_atachment:
-    txtattachment = st.file_uploader("Sube tu archivo de texto", type=['txt'])
+    if lang == 'Español':
+      txtattachment = st.file_uploader("Sube tu archivo de texto", type=['txt'])
+    else:
+      txtattachment = st.file_uploader("Upload your text file", type=['txt'])
 else:
     txtattachment = None
 
 if csv_excel_atachment:
-    csvexcelattachment = st.file_uploader("Sube tu archivo CSV o Excel", type=['csv', 'xlsx'])
+    if lang == 'Español':
+      csvexcelattachment = st.file_uploader("Sube tu archivo CSV o Excel", type=['csv', 'xlsx'])
+    else:
+      csvexcelattachment = st.file_uploader("Upload your CSV or Excel file", type=['csv', 'xlsx'])
 else:
     csvexcelattachment = None
-prompt = st.chat_input("Escribe tu mensaje")
+if lang == 'Español':
+  prompt = st.chat_input("Escribe tu mensaje")
+else:
+  prompt = st.chat_input("Write your message")
 
 if prompt:
     txt = ''
     if txtattachment:
         txt = txtattachment.getvalue().decode("utf-8")
-        txt = '   Archivo de texto: \n' + txt
+        if lang == 'Español':
+          txt = '   Archivo de texto: \n' + txt
+        else:
+          txt = '   Text file: \n' + txt
 
     if csvexcelattachment:
         try:
@@ -152,7 +198,10 @@ if prompt:
         txt += '   Dataframe: \n' + str(df)
 
     if graphviz_mode:
-        txt += '   Genera un grafo con graphviz en .dot: \n'
+        if lang == 'Español':
+          txt += '   Genera un grafo con graphviz en .dot: \n'
+        else:
+          txt += '   Generate a graph with graphviz in .dot: \n'
 
     if len(txt) > 5000:
         txt = txt[:5000] + '...'
@@ -167,7 +216,11 @@ if prompt:
 
     append_message(prmt)
 
-    with st.spinner('Espera un momento, estoy pensando...'):
+    if lang == 'Español':
+      spinertxt = 'Espera un momento, estoy pensando...'
+    else:
+      spinertxt = 'Wait a moment, I am thinking...'
+    with st.spinner(spinertxt):
         if len(prmt['parts']) > 1:
             response = vision.generate_content(prmt['parts'],stream=True,safety_settings=[
         {
