@@ -1,9 +1,7 @@
 import streamlit as st
 import pandas as pd
 import google.generativeai as genai
-from IPython.display import Markdown
-import textwrap
-import re
+
 
 from PIL import Image
 #Je t'aime plus que les mots,
@@ -23,24 +21,6 @@ Powered by Google AI <img src="https://seeklogo.com/images/G/google-ai-logo-996E
 st.caption("By Sergio Demis Lopez Martinez")
 st.divider()
 
-def extraer_contenido(texto):
-    # Expresión regular para extraer las llaves "parts" y "role" con su contenido
-    expresion_regular = r'"parts":\s*{([^}]*)}.*"role":\s*"([^"]*)"'
-
-    # Buscar coincidencias en el texto
-    coincidencias = re.search(expresion_regular, texto)
-
-    # Extraer el contenido de las llaves "parts" y "role"
-    if coincidencias:
-        contenido_parts = coincidencias.group(1).strip()
-        role = coincidencias.group(2).strip()
-        return contenido_parts, role
-    else:
-        return None, None
-
-def to_markdown(text):
-  text = text.replace('•', '  *')
-  return Markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
 
 def append_message(message):
     st.session_state.chat_session.append({'user': message})
