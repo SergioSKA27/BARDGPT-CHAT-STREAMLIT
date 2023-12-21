@@ -3,6 +3,7 @@ import pandas as pd
 import google.generativeai as genai
 import re
 from PIL import Image
+import requests
 
 #Je t'aime plus que les mots,
 #Plus que les sentiments,
@@ -94,7 +95,7 @@ if len(st.session_state.chat_session) > 0:
                     for graph in graphs:
                         st.graphviz_chart(graph,use_container_width=False)
                         with st.expander("Ver texto"):
-                          st.write(graph)
+                          st.code(graph, language='dot')
         else:
             with st.chat_message('user'):
                 st.write(message['user']['parts'][0])
@@ -109,18 +110,20 @@ if len(st.session_state.chat_session) > 0:
 cols=st.columns(4)
 
 with cols[0]:
-    image_atachment = st.checkbox("Adjuntar imagen")
+    image_atachment = st.toggle("Adjuntar imagen", value=False, help="Activa este modo para adjuntar una imagen y que el chatbot pueda leerla")
 with cols[1]:
-    txt_atachment = st.checkbox("Adjuntar texto")
+    txt_atachment = st.toggle("Adjuntar archivo de texto", value=False, help="Activa este modo para adjuntar un archivo de texto y que el chatbot pueda leerlo")
 with cols[2]:
-    csv_excel_atachment = st.checkbox("Adjuntar CSV o Excel")
+    csv_excel_atachment = st.toggle("Adjuntar CSV o Excel", value=False, help="Activa este modo para adjuntar un archivo CSV o Excel y que el chatbot pueda leerlo")
 with cols[3]:
-    graphviz_mode = st.checkbox("Modo Graphviz")
+    graphviz_mode = st.toggle("Modo graphviz", value=False, help="Activa este modo para generar un grafo con graphviz en .dot a partir de tu mensaje")
 
 if image_atachment:
     image = st.file_uploader("Sube tu imagen", type=['png', 'jpg', 'jpeg'])
+    url = st.text_input("O pega la url de tu imagen")
 else:
     image = None
+    url = ''
 
 
 
@@ -153,8 +156,12 @@ if prompt:
 
     if len(txt) > 5000:
         txt = txt[:5000] + '...'
-    if image:
-        prmt  = {'role': 'user', 'parts':[prompt+txt, Image.open(image)]}
+    if image or url != '':
+        if url != '':
+            img = Image.open(requests.get(url, stream=True).raw)
+        else:
+            img = Image.open(image)
+        prmt  = {'role': 'user', 'parts':[prompt+txt, img]}
     else:
         prmt  = {'role': 'user', 'parts':[prompt+txt]}
 
