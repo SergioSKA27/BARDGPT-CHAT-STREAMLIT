@@ -5,13 +5,15 @@ from IPython.display import Markdown
 import textwrap
 import re
 
+from PIL import Image
 #Je t'aime plus que les mots,
 #Plus que les sentiments,
 #Plus que la vie elle-même
 
 st.set_page_config(
     page_title="Google AI Chat",
-    page_icon="https://seeklogo.com/images/G/google-ai-logo-996E85F6FD-seeklogo.com.png"
+    page_icon="https://seeklogo.com/images/G/google-ai-logo-996E85F6FD-seeklogo.com.png",
+    layout="wide",
 )
 # Path: Main.py
 #Author: Sergio Demis Lopez Martinez
@@ -114,7 +116,7 @@ prompt = st.chat_input("Escribe tu mensaje")
 
 if prompt:
     if image:
-        prmt  = {'role': 'user', 'parts':[prompt, image.read()]}
+        prmt  = {'role': 'user', 'parts':[prompt, Image.open(image)]}
     else:
         prmt  = {'role': 'user', 'parts':[prompt]}
 
@@ -122,11 +124,22 @@ if prompt:
 
     with st.spinner('Espera un momento, estoy pensando...'):
         if len(prmt['parts']) > 1:
-            response = vision.generate_content(prmt['parts'],stream=True)
+            response = vision.generate_content(prmt['parts'],stream=True,safety_settings=[
+        {
+            "category": "HARM_CATEGORY_HARASSMENT",
+            "threshold": "BLOCK_LOW_AND_ABOVE",
+        },
+        {
+            "category": "HARM_CATEGORY_HATE_SPEECH",
+            "threshold": "BLOCK_LOW_AND_ABOVE",
+        },
+    ]
+)
+            response.resolve()
         else:
             response = st.session_state.chat.send_message(prmt['parts'][0])
         append_message({'role': 'model', 'parts':response.text})
-        st.experimental_rerun()
+        st.rerun()
 
 
 
