@@ -1,5 +1,5 @@
 import streamlit as st
-import requests
+import pandas as pd
 import google.generativeai as genai
 from IPython.display import Markdown
 import textwrap
@@ -105,20 +105,53 @@ if len(st.session_state.chat_session) > 0:
 
 #st.session_state.chat.history
 
+cols=st.columns(4)
 
-image_atachment = st.checkbox("Adjuntar imagen")
+with cols[0]:
+    image_atachment = st.checkbox("Adjuntar imagen")
+with cols[1]:
+    txt_atachment = st.checkbox("Adjuntar texto")
+with cols[2]:
+    csv_excel_atachment = st.checkbox("Adjuntar CSV o Excel")
+
+
 if image_atachment:
     image = st.file_uploader("Sube tu imagen", type=['png', 'jpg', 'jpeg'])
 else:
     image = None
+
+
+
+if txt_atachment:
+    txtattachment = st.file_uploader("Sube tu archivo de texto", type=['txt'])
+else:
+    txtattachment = None
+
+if csv_excel_atachment:
+    csvexcelattachment = st.file_uploader("Sube tu archivo CSV o Excel", type=['csv', 'xlsx'])
+else:
+    csvexcelattachment = None
 prompt = st.chat_input("Escribe tu mensaje")
 
-
 if prompt:
+    txt = ''
+    if txtattachment:
+        txt = txtattachment.getvalue().decode("utf-8")
+        txt = '   Archivo de texto: \n' + txt
+
+    if csvexcelattachment:
+        try:
+            df = pd.read_csv(csvexcelattachment)
+        except:
+            df = pd.read_excel(csvexcelattachment)
+        txt = '   Dataframe: \n' + str(df)
+
+    if len(txt) > 5000:
+        txt = txt[:5000] + '...'
     if image:
-        prmt  = {'role': 'user', 'parts':[prompt, Image.open(image)]}
+        prmt  = {'role': 'user', 'parts':[prompt+txt, Image.open(image)]}
     else:
-        prmt  = {'role': 'user', 'parts':[prompt]}
+        prmt  = {'role': 'user', 'parts':[prompt+txt]}
 
     append_message(prmt)
 
@@ -138,6 +171,7 @@ if prompt:
             response.resolve()
         else:
             response = st.session_state.chat.send_message(prmt['parts'][0])
+
         append_message({'role': 'model', 'parts':response.text})
         st.rerun()
 
