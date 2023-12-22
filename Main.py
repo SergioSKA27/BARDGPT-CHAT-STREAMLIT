@@ -135,7 +135,11 @@ if len(st.session_state.chat_session) > 0:
                 if len(graphs) > 0:
                     for graph in graphs:
                         st.graphviz_chart(graph,use_container_width=False)
-                        with st.expander("Ver texto"):
+                        if lang == 'Español':
+                          view = "Ver texto"
+                        else:
+                          view = "View text"
+                        with st.expander(view):
                           st.code(graph, language='dot')
         else:
             with st.chat_message('user'):
