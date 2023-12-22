@@ -16,11 +16,15 @@ st.set_page_config(
 )
 # Path: Main.py
 #Author: Sergio Demis Lopez Martinez
+#------------------------------------------------------------
+#HEADER
 st.markdown('''
 Powered by Google AI <img src="https://seeklogo.com/images/G/google-ai-logo-996E85F6FD-seeklogo.com.png" width="20" height="20">
 , Streamlit and Python''', unsafe_allow_html=True)
 st.caption("By Sergio Demis Lopez Martinez")
 
+#------------------------------------------------------------
+#LANGUAGE
 langcols = st.columns([0.2,0.8])
 with langcols[0]:
   lang = st.selectbox('Select your language',
@@ -48,7 +52,7 @@ def extract_graphviz_info(text: str) -> list[str]:
 
   graphviz_info  = text.split('```')
 
-  return [graph for graph in graphviz_info if 'graph' in graph or 'digraph' in graph]
+  return [graph for graph in graphviz_info if ('graph' in graph or 'digraph' in graph) and ('{' in graph and '}' in graph)]
 
 def append_message(message: dict) -> None:
     """
@@ -81,6 +85,10 @@ def load_modelvision() -> genai.GenerativeModel:
     model = genai.GenerativeModel('gemini-pro-vision')
     return model
 
+
+
+#------------------------------------------------------------
+#CONFIGURATION
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 model = load_model()
