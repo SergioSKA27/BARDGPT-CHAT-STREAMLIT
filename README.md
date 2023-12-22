@@ -1,6 +1,5 @@
 # Google AI Chat - Streamlit App
 
----
 
 ## Overview
 
